@@ -1,6 +1,8 @@
 -- Snake Game in Lua (LÖVE 2D)
 ---@diagnostic disable: undefined-global
 
+
+local gridSize = 40
 local snake = {{x = 5, y = 5}}
 local direction = {x = 1, y = 0}
 local food = {x = 10, y = 10}
@@ -18,8 +20,7 @@ local specialFoodTimer = 0            -- ตัวจับเวลาอาห
 local specialFoodDuration = 5         -- เวลาที่อาหารพิเศษอยู่บนหน้าจอ (วินาที)
 local lastLevelUpScore = 0 -- เก็บค่าคะแนนครั้งสุดท้ายที่เพิ่มระดับ
 local wonScore = 200 -- คะแนนที่ต้องการเพื่อชนะเกม
-local maxSpeed = 0.1 -- ความเร็วสูงสุดที่สามารถเพิ่มได้ ยิ่งต่ำ = ยิ่งเร็ว
-
+local maxSpeed = 0.1 -- ความเร็วสูงสุดที่สามารถเพิ่มได้
 
 
 
@@ -52,15 +53,26 @@ function love.update(dt)
         specialFood.y = -1
     end
 
-    -- ควบคุมการเคลื่อนที่ของงู
-    if love.keyboard.isDown("up") or love.keyboard.isDown("w") and direction.y == 0 then
-        direction = {x = 0, y = -1}
-    elseif love.keyboard.isDown("down") or love.keyboard.isDown("s") and direction.y == 0 then
-        direction = {x = 0, y = 1}
-    elseif love.keyboard.isDown("left") or love.keyboard.isDown("a") and direction.x == 0 then
+    -- ควบคุมการเคลื่อนที่ของงู (ห้ามกดย้อนศร)
+    if (love.keyboard.isDown("up") or love.keyboard.isDown("w")) and direction.y == 0 then
+        direction = {x = 0, y = -1} -- ขึ้น
+    elseif (love.keyboard.isDown("down") or love.keyboard.isDown("s")) and direction.y == 0 then
+        direction = {x = 0, y = 1} -- ลง
+    elseif (love.keyboard.isDown("left") or love.keyboard.isDown("a")) and direction.x == 0 then
+        direction = {x = -1, y = 0} -- ซ้าย
+    elseif (love.keyboard.isDown("right") or love.keyboard.isDown("d")) and direction.x == 0 then
+        direction = {x = 1, y = 0} -- ขวา
+    end
+
+    -- **ป้องกันการย้อนกลับ**
+    if (love.keyboard.isDown("left") or love.keyboard.isDown("a")) and direction.x ~= 1 then
         direction = {x = -1, y = 0}
-    elseif love.keyboard.isDown("right") or love.keyboard.isDown("d") and direction.x == 0 then
+    elseif (love.keyboard.isDown("right") or love.keyboard.isDown("d")) and direction.x ~= -1 then
         direction = {x = 1, y = 0}
+    elseif (love.keyboard.isDown("up") or love.keyboard.isDown("w")) and direction.y ~= 1 then
+        direction = {x = 0, y = -1}
+    elseif (love.keyboard.isDown("down") or love.keyboard.isDown("s")) and direction.y ~= -1 then
+        direction = {x = 0, y = 1}
     end
 
     -- ใช้ speed ที่ถูกเร่งเมื่อกด Spacebar
@@ -68,9 +80,6 @@ function love.update(dt)
         moveSnake()
     end
 end
-
-
-
 
 function moveSnake()
     local head = {x = snake[1].x + direction.x, y = snake[1].y + direction.y}
@@ -189,11 +198,14 @@ function love.keypressed(key)
         specialFood.x = -1 -- รีเซ็ตอาหารพิเศษเมื่อรีสตาร์ทเกม
         specialFood.y = -1
         specialFoodTimer = 0
+        lastLevelUpScore = 0 -- รีเซ็ตค่าคะแนนที่ใช้คำนวณ Level Up
     end
 end
 
 
+
 function addScore()
+
     score = score + 1
 
     if score >= wonScore then  -- เมื่อคะแนนถึง 70 ให้เกมหยุด
