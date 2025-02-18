@@ -1,8 +1,6 @@
 -- Snake Game in Lua (LÖVE 2D)
 ---@diagnostic disable: undefined-global
 
-
-local gridSize = 40
 local snake = {{x = 5, y = 5}}
 local direction = {x = 1, y = 0}
 local food = {x = 10, y = 10}
@@ -20,7 +18,8 @@ local specialFoodTimer = 0            -- ตัวจับเวลาอาห
 local specialFoodDuration = 5         -- เวลาที่อาหารพิเศษอยู่บนหน้าจอ (วินาที)
 local lastLevelUpScore = 0 -- เก็บค่าคะแนนครั้งสุดท้ายที่เพิ่มระดับ
 local wonScore = 200 -- คะแนนที่ต้องการเพื่อชนะเกม
-local maxSpeed = 0.1 -- ความเร็วสูงสุดที่สามารถเพิ่มได้
+local maxSpeed = 0.1 -- ความเร็วสูงสุดที่สามารถเพิ่มได้ ยิ่งต่ำ = ยิ่งเร็ว
+
 
 
 
